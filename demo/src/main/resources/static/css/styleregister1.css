@@ -1,0 +1,32 @@
+
+#logo {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    height: 200px; /* Dimensione del logo */
+}
+body{
+    background-image: url("/img/sfondo7.jpg");
+    background-size: cover; /* Copre l'intera area senza tagli */
+    background-position: center; /* Centra l'immagine */
+    background-repeat: no-repeat; /* Evita la ripetizione */
+    height: 100vh; /* Altezza della pagina al 100% */
+}
+.btn{
+    background-color: green;
+}
+.btn:hover{
+    background-color: green;
+    filter: brightness(150%);
+    color : black
+}
+.accedi{
+    text-decoration: none;
+}
+.accedi:hover{
+    text-decoration:underline ;
+}
+
+#err{
+	color: red;
+}
