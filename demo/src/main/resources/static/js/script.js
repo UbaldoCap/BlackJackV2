@@ -126,8 +126,13 @@ function checkAssoDealer(){
     if (dealerFirstCard[0] == 'A'){
         $('#intestazioneAssicurazione').hide();
         if((puntataIniziale/2)>saldo){
-            mostraAzioni(1);
-            return;
+            if(dealerBlackJack==true){
+                endGame();
+                return;
+            } else {
+                mostraAzioni(1);
+                return;
+            }            
         }
         $('#containerAssicurazione').show();
 
@@ -196,7 +201,7 @@ async function hit(nMano) {
     nascondiSplit(nMano);
     
     let tagImg = document.createElement("img");
-    let card = deck.pop();
+    let card = "9-fiori";
     tagImg.src = "./cards/" + card + ".svg";
     mano.carteinMano.push(card);
     mano.punteggio += getValue(card);
@@ -280,7 +285,8 @@ async function endGame(){
             mano.vittoria();
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
             containerMano.find('.esito').text(mano.esito);
-        } else if (mano.punteggio === punteggioDealer) {
+        } 
+            else if (mano.punteggio === punteggioDealer) {
             if(mano.playerBlackJack==true){
                 if(dealerBlackJack==true){
                     mano.pareggio();
@@ -290,11 +296,16 @@ async function endGame(){
                 }
             } 
             else {
-                mano.pareggio();
+                if(dealerBlackJack==true){
+                    mano.sconfitta();
+                } else {
+                    mano.pareggio();
+                }                
             }
             
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
             containerMano.find('.esito').text(mano.esito);
+
         } else if (mano.punteggio > punteggioDealer) {
             mano.vittoria();
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
@@ -508,7 +519,7 @@ async function dealerFirstHit(){
 async function dealerSecondHit(){
     let tagImg = document.createElement("img");
     tagImg.id="cartaCoperta";
-    cartaCoperta=deck.pop();
+    cartaCoperta="K-fiori";
     tagImg.src = "./cards/retro.svg";
     punteggioDealer += getValue(cartaCoperta);
     dealerAceCount += checkAce(cartaCoperta);
