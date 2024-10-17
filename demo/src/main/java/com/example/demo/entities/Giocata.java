@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 public class Giocata {
     @Id
@@ -12,6 +15,7 @@ public class Giocata {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Utente utente;
 
     private Integer importo;
@@ -70,14 +74,4 @@ public class Giocata {
         this.data = data;
     }
 
-    @Override
-    public String toString() {
-        return "Giocata{" +
-                "id=" + id +
-                ", utente=" + utente +
-                ", importo=" + importo +
-                ", profit=" + profit +
-                ", data=" + data +
-                '}';
-    }
 }

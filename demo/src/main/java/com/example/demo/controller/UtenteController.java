@@ -3,16 +3,19 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.demo.entities.Utente;
 import com.example.demo.services.UtenteService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -25,6 +28,9 @@ public class UtenteController {
 	@PostMapping("/add")
 	public String add(@ModelAttribute Utente utente, HttpServletRequest request) {
 		try {
+			if (utente.getUsername().equalsIgnoreCase("guest")) {
+				throw new Exception("username non valido");
+			}
 			utenteService.add(utente);
 		} catch(Exception e) {
 			request.setAttribute("err", "si");
@@ -37,7 +43,7 @@ public class UtenteController {
 	public String guest(HttpServletRequest request) {
 		List<Utente> classifica = utenteService.leaderBoard();
 		request.setAttribute("lead", classifica);
-		request.getSession().setAttribute("user", new Utente(1000, "guest", "guest", "guest"));
+		request.getSession().setAttribute("user", new Utente(1000, "guest", "guest"));
 		return "homeguest";
 	}
 	
@@ -54,9 +60,9 @@ public class UtenteController {
 				throw new IllegalArgumentException("Utente non trovato");
 			}
 			if (u.getOnline()) {
-				throw new IllegalArgumentException("Utente non trovato");
+				throw new IllegalArgumentException("Utente online");
 			}
-			System.out.println(u);
+			utenteService.updateIpSessionId(u.getId(), session.getId(), getClientIp(request));
 			List<Utente> classifica = utenteService.leaderBoard();
 			request.setAttribute("lead", classifica);
 			session.setAttribute("user", utenteService.update(u.getId(), true).get());
@@ -70,10 +76,34 @@ public class UtenteController {
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		Utente u = (Utente) session.getAttribute("user");
+		if (u.getUsername().equalsIgnoreCase("guest")) {
+			session.setAttribute("user", null);
+			session.invalidate();
+			return "index";
+		}
 		u.setOnline(false);
+		u.setIp(null);
 		utenteService.add(u);
 		session.setAttribute("user", null);
+		session.invalidate();
 		return "index";
 	}
 	
+	 public String getClientIp(HttpServletRequest request) {
+	        String ip = request.getHeader("X-Forwarded-For");
+	        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+	            ip = request.getRemoteAddr();
+	        }
+	        return ip;
+	    }
+	 
+	 @PostMapping("/ricarica")
+	 public String ricarica(HttpSession session) {
+		 Utente u = (Utente)session.getAttribute("user");
+		 int id = u.getId();
+		 utenteService.updateSaldo(id, 1000);
+		 u.setSaldo(1000);
+		 session.setAttribute("user", u);
+		 return "play";
+	 }
 }

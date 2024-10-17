@@ -31,7 +31,27 @@ public class UtenteService {
     public Optional<Utente> update(Integer id, Boolean b) {
         Optional<Utente> optionalUtente = utenteRepo.findById(id);
         if (optionalUtente.isPresent()) {
-            optionalUtente.get().setOnline(b);
+            optionalUtente.get().setOnline(b);      
+            return Optional.of(utenteRepo.save(optionalUtente.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    public Optional<Utente> updateSaldo(Integer id, Integer b) {
+        Optional<Utente> optionalUtente = utenteRepo.findById(id);
+        if (optionalUtente.isPresent()) {
+            optionalUtente.get().setSaldo(b);      
+            return Optional.of(utenteRepo.save(optionalUtente.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+    
+    public Optional<Utente> updateIpSessionId(Integer id, String sessionId, String ip) {
+        Optional<Utente> optionalUtente = utenteRepo.findById(id);
+        if (optionalUtente.isPresent()) {
+            optionalUtente.get().setIp(ip);   
             return Optional.of(utenteRepo.save(optionalUtente.get()));
         } else {
             return Optional.empty();
@@ -58,5 +78,9 @@ public class UtenteService {
     
     public Boolean online(Integer id) {
     	return utenteRepo.findOnlineStatusById(id);
+    }
+    
+    public Utente findByIp(String ip) {
+    	return utenteRepo.findByIp(ip);
     }
 }

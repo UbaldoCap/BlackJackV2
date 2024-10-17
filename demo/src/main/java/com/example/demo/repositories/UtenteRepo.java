@@ -20,4 +20,6 @@ public interface UtenteRepo extends JpaRepository<Utente, Integer> {
 	
 	@Query("SELECT u.online FROM Utente u WHERE u.id = :id")
     Boolean findOnlineStatusById(@Param("id") Integer id);
+	
+	Utente findByIp(String ip);
 }

@@ -23,10 +23,6 @@
                     <div class="card-body">
                         <form action="/utente/add" method ="post">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Nome Completo</label>
-                                <input type="text" class="form-control" id="name" name="nome" placeholder="Inserisci il tuo nome" required>
-                            </div>
-                            <div class="mb-3">
                                 <label for="username" class="form-label">Username</label>
                                 <input type="text" class="form-control" id="username" name="username" placeholder="Inserisci il tuo username" required>
                             </div>

@@ -10,8 +10,6 @@ public class Utente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(nullable = false)
-    private String nome;
     @Column(unique = true, nullable = false)
     private String username;
     @Column(nullable = false)
@@ -20,12 +18,12 @@ public class Utente {
     private Integer saldo;
     @Column(columnDefinition = "BIT")
     private Boolean online;
-    @OneToMany(mappedBy = "utente")
+    @OneToMany(mappedBy = "utente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Giocata> giocata;
+    private String ip;
 
-    public Utente(Integer id, String nome, String username, String password) {
+    public Utente(Integer id, String username, String password) {
         this.id = id;
-        this.nome = nome;
         this.username = username;
         this.password = password;
         saldo = 1000;
@@ -45,14 +43,6 @@ public class Utente {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
     }
 
     public String getUsername() {
@@ -95,11 +85,11 @@ public class Utente {
 		this.online = online;
 	}
 
-	@Override
-	public String toString() {
-		return "Utente [id=" + id + ", nome=" + nome + ", username=" + username + ", password=" + password + ", saldo="
-				+ saldo + ", online=" + online + ", giocata=" + giocata + "]";
+	public String getIp() {
+		return ip;
 	}
-	
-	
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
 }
