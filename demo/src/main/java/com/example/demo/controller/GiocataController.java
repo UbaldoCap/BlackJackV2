@@ -64,11 +64,11 @@ public class GiocataController {
 		Utente utente = (Utente) request.getSession().getAttribute("user");
 		int puntata = (int) payload.get("puntata");
 		System.out.println(puntata);
-		int profit = (int) payload.get("saldo");
+		int profit = (int) payload.get("ricavo");
 		System.out.println(profit);
 		int nuovoSaldo = utente.getSaldo() + profit;
 		if (utente.getUsername().equalsIgnoreCase("guest")) {
-			utente.setSaldo(profit);
+			utente.setSaldo(nuovoSaldo);
 			request.getSession().setAttribute("user", utente);
 			return;
     	}
@@ -76,7 +76,8 @@ public class GiocataController {
 		giocata.setUtente(utente);
 		giocata.setImporto(puntata);
 		giocata.setProfit(profit);
-		us.updateSaldo(utente.getId(), profit);
+		giocata.setSaldo(nuovoSaldo);
+		us.updateSaldo(utente.getId(), nuovoSaldo);
 		gs.add(giocata);
 		request.getSession().setAttribute("user", us.getById(utente.getId()).get());
 		

@@ -8,31 +8,33 @@ $('#ricarica').on('click', async () => {
     fetch('/utente/ricarica', {
         method: 'POST'
     })
-    await delay(500);
+    await delay(200);
     location.reload();
 })
 
+// La classe Mano definisce i metodi e le variabili comuni per tutte le mani giocate in caso di Split
 class Mano {
     punteggio = 0;
     totPuntata = 0;
     profitto = 0;
     esito = "";
-    message = "";
     playerBlackJack=false;
     carteinMano = [];
     sballato=false;
     aceCount = 0;
 
+    //Questa funzione riduce il valore degli assi qualora il punteggio superasse il valore di 21
     reducePlayerAces() {
-        
         while (this.punteggio > 21 && this.aceCount > 0) {
         this.punteggio -= 10;
         this.aceCount --;
         }    
     }
 
+    //Distribuisce la prima carta al giocatore
     async playerFirstHit(){ 
-   
+        
+        play("flipcard"); 
         let tagImg = document.createElement("img");
         tagImg.id='playerFirstCard';
         let card = "A-cuori";
@@ -40,14 +42,16 @@ class Mano {
         this.carteinMano.push(card);
         this.punteggio += getValue(card);
         this.aceCount += checkAce(card);
+
         $('.containerMano[data-mano="1"]').find('.containerCarteGiocatore').append(tagImg);
 
         this.reducePlayerAces(); 
         $('.containerMano[data-mano="1"]').find('.punteggio').text(this.punteggio);               
     }
 
+    //Distribuisce la seconda carta al giocatore
     async playerSecondHit(){ 
-   
+        play("flipcard");  
         let tagImg = document.createElement("img");
         tagImg.classList.add('playerSecondCard');
         let card = "A-picche";
@@ -61,6 +65,7 @@ class Mano {
         $('.containerMano[data-mano="1"]').find('.punteggio').text(this.punteggio);            
     }
 
+    //Aggiorna il profitto e il saldo in caso di vittoria
     vittoria(){
         if (this.playerBlackJack==true){
             this.profitto=this.totPuntata*2.5;            
@@ -69,30 +74,33 @@ class Mano {
         }
         saldo += this.profitto;
         mostraSaldoAggiornato();
-        this.esito='Vittoria!';        
+        this.esito='Vittoria!';
+        play('victory');        
     }
     
+    //Aggiorna il profitto e il saldo in caso di pareggio
     pareggio(){
         saldo+=this.totPuntata;
         mostraSaldoAggiornato();
         this.esito='Pareggio!';
+        play('draw');
     }
     
+    //Aggiorna il profitto e il saldo in caso di sconfitta
     sconfitta(){
-        this.esito='Sconfitta';        
+        this.esito='Sconfitta'; 
+        play('defeat');       
     }
-
 }
 
 let deck = [];
 let mani = [];
-const mano1 = new Mano();
-mani.push(mano1);
+const mano1 = new Mano();   //Inizializza la prima mano
+mani.push(mano1);           //Aggiunge la prima mano all'array di mani
 
-let intervallo=1500;
+let intervallo=1000;
 let punteggioDealer = 0;
 let saldo = parseInt($('#saldo').text());
-
 let saldoIniziale = 0;
 let dealerFirstCard="";
 let cartaCopertaImage="";
@@ -109,11 +117,8 @@ let counterMani = 0;
 buildDeck();
 shuffleDeck();
 
-viewPuntataIniziale(); //siamo ancora alla schermata della puntata
+viewPuntataIniziale(); //Visualizza la puntata nella schermata della puntata iniziale
 puntata();
-
-
-
 
 function play(id){
     let audio = document.getElementById(id);
@@ -126,15 +131,15 @@ function checkAssoDealer(){
     if (dealerFirstCard[0] == 'A'){
         $('#intestazioneAssicurazione').hide();
         if((puntataIniziale/2)>saldo){
-            mostraAzioni(1);
+            checkDealerBlackJack(); 
             return;
         }
-        $('#containerAssicurazione').show();
+        $('#containerAssicurazione').css('visibility', 'visible');
 
         $('#sì').on('click', assicurazione);
     
         $('#no').on('click', () => {
-            $('#containerAssicurazione').hide();
+            $('#containerAssicurazione').css('visibility', 'hidden');
             checkDealerBlackJack();        
         });
     }
@@ -144,11 +149,13 @@ function checkAssoDealer(){
 }
 
 function assicurazione(){
+    play("clickPuntata"); 
     puntataAssicurazione=puntataIniziale/2;
     saldo-=puntataAssicurazione;
     mostraSaldoAggiornato();
     $('#puntataAssicurazione').text(puntataAssicurazione);
     $('#alertAssicurazione').hide();
+    $('#containerAssicurazione').html('<br><br>');
     $('#intestazioneAssicurazione').show();
     
     checkDealerBlackJack();   
@@ -194,7 +201,8 @@ async function hit(nMano) {
 
     nascondiRaddoppia(nMano);
     nascondiSplit(nMano);
-    
+
+    play("flipcard");     
     let tagImg = document.createElement("img");
     let card = deck.pop();
     tagImg.src = "./cards/" + card + ".svg";
@@ -218,12 +226,9 @@ async function hit(nMano) {
 }
 
 async function stay(nMano) {
-            
-    nascondiAzioni(nMano);
-    
-    //await delay(intervallo);
 
-    
+    nascondiAzioni(nMano);
+
     console.log("Lunghezza dell'array mani:", mani.length);
     console.log("Valore di nMano:", nMano);
     if(mani[nMano] !== undefined){  //se esiste una mano successiva, passa alla prossima, altrimenti termina il gioco
@@ -232,19 +237,19 @@ async function stay(nMano) {
         mostraAzioni(nMano+1);
     } else {
         endGame();
-    }
-   
+    }   
 }
 
 async function endGame(){
     await delay(intervallo);
 
+    play('flipcard');
     $('#cartaCoperta').attr('src', './cards/' + cartaCoperta + '.svg'); //svela la carta coperta
     if(dealerBlackJack==true){
         $('#punteggioDealer').text('Black Jack!');
         saldo+=puntataAssicurazione*2;
         mostraSaldoAggiornato();
-        $('#intestazioneAssicurazione').append('<br></br>Assicurazione vinta!');
+        $('#intestazioneAssicurazione').append('<br>Assicurazione vinta!');
     } else {
         $('#punteggioDealer').text(punteggioDealer);
     }
@@ -274,23 +279,31 @@ async function endGame(){
         if (mano.punteggio > 21) {
             mano.sconfitta();
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+            containerMano.find('.esito').addClass('sfondoRosso');
             containerMano.find('.esito').text(mano.esito);
 
         } else if (punteggioDealer > 21) {
             mano.vittoria();
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+            containerMano.find('.esito').addClass('sfondoVerde');
             containerMano.find('.esito').text(mano.esito);
         } else if (mano.punteggio === punteggioDealer) {
             if(mano.playerBlackJack==true){
                 if(dealerBlackJack==true){
                     mano.pareggio();
+                    const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+                    containerMano.find('.esito').addClass('sfondoGiallo');                   
                 }
                 else {
                     mano.vittoria();
+                    const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+                    containerMano.find('.esito').addClass('sfondoVerde');  
                 }
             } 
             else {
                 mano.pareggio();
+                const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+                containerMano.find('.esito').addClass('sfondoGiallo');  
             }
             
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
@@ -298,17 +311,18 @@ async function endGame(){
         } else if (mano.punteggio > punteggioDealer) {
             mano.vittoria();
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+            containerMano.find('.esito').addClass('sfondoVerde'); 
             containerMano.find('.esito').text(mano.esito);
+            
         } else if (mano.punteggio < punteggioDealer) {
             mano.sconfitta();
             const containerMano = $('.containerMano[data-mano='+(indice+1)+']');
+            containerMano.find('.esito').addClass('sfondoRosso'); 
             containerMano.find('.esito').text(mano.esito);
-        }
-        
+        }        
     }
 
-
-    
+    await delay(intervallo);
 
     let ricavo = saldo - saldoIniziale;
     
@@ -320,8 +334,7 @@ async function endGame(){
         $('#profitto').text("Saldo invariato");
     }
 
-
-	let sommaPuntate=0;
+    let sommaPuntate=0;
 	
 	for (let mano of mani){
 		sommaPuntate+=mano.totPuntata;		
@@ -330,7 +343,7 @@ async function endGame(){
 	sommaPuntate+=puntataAssicurazione;
 	
     var dati ={
-        saldo: saldo,
+        ricavo: ricavo,
         puntata: sommaPuntate
     }
     fetch('/g', {
@@ -340,7 +353,6 @@ async function endGame(){
         },
         body: JSON.stringify(dati)
     })
-
 
     $('#rigioca').show();
 
@@ -408,7 +420,6 @@ function buildDeck() {
             deck.push(values[j] + "-" + types[i]); 
         }
     }
-
 }
 
 function shuffleDeck() {
@@ -431,11 +442,12 @@ async function startGame() {
     $('#containerPuntata').hide();
     $('#containerPartita').show();
     
-    await delay(intervallo);
-    
+    await delay(1500);
+
     containerMano1.find('.puntataMano').text("Totale puntata: "+mano1.totPuntata);
     mano1.playerFirstHit(); //prima carta al giocatore
     await delay(intervallo);
+
     dealerFirstHit();  // prima carta al dealer
     await delay(intervallo);
     
@@ -461,6 +473,16 @@ async function startGame() {
     containerMano1.find('.stay').on("click", () => stay(1));
     containerMano1.find('.raddoppia').on("click", () => raddoppia(1));
     containerMano1.find('.split').on("click", () => split(1));        
+}
+
+//Approccio non più utilizzato
+function invisibleCard() {
+    let tagImg = document.createElement("img");
+    tagImg.src = "./cards/joker.svg";
+    tagImg.classList.add('invisible');
+    let tagImg2 = tagImg.cloneNode(true);
+    $('#containerCarteDealer').append(tagImg);
+    $('.containerMano[data-mano="1"]').find('.containerCarteGiocatore').append(tagImg2);
 }
 
 function getValue(card) {
@@ -491,12 +513,13 @@ function reduceDealerAces(){
 }
 
 async function dealerFirstHit(){
+        play("flipcard"); 
         let tagImg = document.createElement("img");
         dealerFirstCard = "A-quadri";
         tagImg.src = "./cards/" + dealerFirstCard + ".svg";
         punteggioDealer += getValue(dealerFirstCard);
         dealerAceCount += checkAce(dealerFirstCard);
-      
+
         document.getElementById("containerCarteDealer").append(tagImg);
 
         $('#punteggioDealer').text(getValue(dealerFirstCard));
@@ -506,6 +529,7 @@ async function dealerFirstHit(){
 }
 
 async function dealerSecondHit(){
+    play("flipcard"); 
     let tagImg = document.createElement("img");
     tagImg.id="cartaCoperta";
     cartaCoperta=deck.pop();
@@ -518,6 +542,7 @@ async function dealerSecondHit(){
 }
 
 async function dealerHit(){
+        play("flipcard"); 
         let tagImg = document.createElement("img");
         let card = deck.pop();
         tagImg.src = "./cards/" + card + ".svg";
@@ -578,8 +603,8 @@ function checkSplit(nMano){
     }
 }
 
-
 async function split(nMano){
+    play("clickPuntata");
 
     let containerManoAttuale= $('.containerMano[data-mano='+nMano+']');
 
@@ -614,7 +639,6 @@ async function split(nMano){
     tagImg.src = "./cards/" + nuovaMano.carteinMano[0] + ".svg"; 
     nuovoContainerMano.find('.containerCarteGiocatore').append(tagImg);
 
-    
     
     await delay(intervallo);
 
@@ -654,8 +678,8 @@ function eventListeners(){
             }
         }
     
+    /*  Questo vecchio approccio causava dei bug
 
-    /* 
     let containerMano1= $('.containerMano[data-mano=1]');
     let containerMano2= $('.containerMano[data-mano=2]');
     let containerMano3= $('.containerMano[data-mano=3]');
@@ -700,7 +724,7 @@ function eventListeners(){
 }
 
 function splitNewCard(nMano){
-
+    play('flipcard');
     let mano = mani[nMano-1];
     let containerMano = $('.containerMano[data-mano='+nMano+']');
 
@@ -718,17 +742,3 @@ function splitNewCard(nMano){
     
     containerMano.find('.punteggio').text(mano.punteggio); 
 }
-
-// Funzione per mostrare il messaggio personalizzato
-function showCustomAlert(message) {
-    document.getElementById("alert-message").innerText = message;
-    document.getElementById("custom-alert").classList.remove('hidden');
-    mostraSaldoAggiornato();
-
-    // Chiudi l'alert quando si preme il pulsante
-    document.getElementById("close-alert").onclick = function() {
-        document.getElementById("custom-alert").classList.add('hidden');
-    }
-}
-
-
