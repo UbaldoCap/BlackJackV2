@@ -37,7 +37,7 @@ class Mano {
         play("flipcard"); 
         let tagImg = document.createElement("img");
         tagImg.id='playerFirstCard';
-        let card = "A-cuori";
+        let card = deck.pop();
         tagImg.src = "./cards/" + card + ".svg";
         this.carteinMano.push(card);
         this.punteggio += getValue(card);
@@ -54,7 +54,7 @@ class Mano {
         play("flipcard");  
         let tagImg = document.createElement("img");
         tagImg.classList.add('playerSecondCard');
-        let card = "A-picche";
+        let card = deck.pop();
         tagImg.src = "./cards/" + card + ".svg";
         this.carteinMano.push(card);
         this.punteggio += getValue(card);
@@ -515,7 +515,7 @@ function reduceDealerAces(){
 async function dealerFirstHit(){
         play("flipcard"); 
         let tagImg = document.createElement("img");
-        dealerFirstCard = "A-quadri";
+        dealerFirstCard = deck.pop();
         tagImg.src = "./cards/" + dealerFirstCard + ".svg";
         punteggioDealer += getValue(dealerFirstCard);
         dealerAceCount += checkAce(dealerFirstCard);
