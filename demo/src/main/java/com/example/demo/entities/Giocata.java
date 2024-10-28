@@ -20,7 +20,9 @@ public class Giocata {
 
     private Integer importo;
     private Integer profit;
-    private LocalDateTime data;
+    private Integer saldo;
+
+	private LocalDateTime data;
 
     public Giocata(Integer id, Utente utente, Integer importo, Integer profit) {
         this.id = id;
@@ -73,5 +75,13 @@ public class Giocata {
     public void setData(LocalDateTime data) {
         this.data = data;
     }
+    
+    public Integer getSaldo() {
+		return saldo;
+	}
+
+	public void setSaldo(Integer saldo) {
+		this.saldo = saldo;
+	}
 
 }
