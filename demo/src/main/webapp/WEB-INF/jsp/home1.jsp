@@ -46,13 +46,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <%for (Utente u : lead) {
+                        
+                            <% if (lead != null) {for (Utente u : lead) {
                             	%>
                             	<tr>
                                 	<td><%=u.getUsername() %></td>
                                 	<td><%=u.getSaldo() %></td>
                                 </tr> <%
-                            }%>
+                            }}%>
                         </tbody>
                     </table>
                 </div>

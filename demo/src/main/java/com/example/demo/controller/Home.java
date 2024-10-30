@@ -27,7 +27,7 @@ public class Home {
     		request.getSession().setAttribute("user", u);
     		List<Utente> classifica = utenteService.leaderBoard();
     		request.setAttribute("lead", classifica);
-    		return "home";
+    		return "home1";
     	}
     	System.out.println(u);
         return "index";

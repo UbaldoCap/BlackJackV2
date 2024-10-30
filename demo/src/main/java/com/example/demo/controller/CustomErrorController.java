@@ -15,6 +15,6 @@ public class CustomErrorController implements ErrorController {
     	if (session.getAttribute("user") == null) {
     		return "index";
     	}
-        return "home";
+        return "home1";
     }
 }
